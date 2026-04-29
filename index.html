@@ -1,246 +1,92 @@
 <!DOCTYPE html>
+
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teste interactive - Geometrie clasa a V-a</title>
+<title>Teste Matematica</title>
 <style>
-body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#06264d,#145a9e);color:white;text-align:center;padding:20px;margin:0}
-.container{max-width:950px;margin:auto;background:rgba(0,0,0,.35);padding:25px;border-radius:18px;border:2px solid #f4c542}
-h1{color:#f4c542;margin-bottom:5px}.question{background:#123d78;padding:22px;border-radius:12px;margin:20px 0;font-size:20px;line-height:1.4}
-button{display:block;width:100%;margin:10px 0;padding:13px;font-size:16px;border:none;border-radius:10px;cursor:pointer}.answer{background:#eef3ff;color:#06143d}.answer:hover{background:#dbe7ff}.correct{background:#1f9d55!important;color:white}.wrong{background:#c0392b!important;color:white}.next,.restart{background:#f4c542;color:#06143d;font-weight:bold;display:none}.top{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:15px 0}select{padding:10px;font-size:16px;border-radius:8px}.badge{background:#f4c542;color:#06143d;padding:10px 14px;border-radius:8px;font-weight:bold}#feedback{font-size:20px;font-weight:bold;min-height:28px}#tema{font-size:22px;color:#f4c542;font-weight:bold;margin-top:15px}
+body{font-family:Arial;background:#0b1d51;color:white;text-align:center;padding:20px}
+.container{max-width:900px;margin:auto}
+button{padding:12px;margin:10px;border:none;border-radius:10px;cursor:pointer}
+.testBtn{background:gold;color:black;font-size:18px}
+.answer{background:white;color:black;width:80%}
 </style>
 </head>
+
 <body>
+
 <div class="container">
-<h1>Teste interactive de geometrie</h1>
-<h3>Matematică - Clasa a V-a</h3>
-<div class="top">
-<select id="testSelect" onchange="selectTest(this.value)"></select>
-<span class="badge" id="score">Scor: 0 / 0</span>
-</div>
-<div id="tema">Elemente de geometrie</div>
-<div id="number"></div>
-<div class="question" id="q"></div>
+
+<h1>Alege testul</h1>
+
+<button class="testBtn" onclick="startTest(0)">Clasa a V-a - Geometrie</button> <button class="testBtn" onclick="startTest(1)">Clasa a VI-a - Numere întregi</button>
+
+<div id="game" style="display:none">
+<h2 id="q"></h2>
 <div id="answers"></div>
-<div id="feedback"></div>
-<button class="next" onclick="nextQ()">Următoarea întrebare</button>
-<button class="restart" onclick="restartTest()">Reia testul</button>
+<p id="feedback"></p>
+<button onclick="nextQ()">Continuă</button>
 </div>
+
+</div>
+
 <script>
+
 const tests = [
+
+/* TEST CLASA V */
 [
-{q:"Dacă AB = 8 cm și BC = 5 cm, iar A, B, C sunt coliniare în această ordine, cât este AC?",a:["3 cm","13 cm","40 cm","8 cm"],c:1},
-{q:"Dacă AC = 15 cm și AB = 6 cm, iar A, B, C sunt coliniare în această ordine, cât este BC?",a:["9 cm","21 cm","6 cm","15 cm"],c:0},
-{q:"Distanța dintre punctele A și B este 12 cm. Atunci lungimea segmentului AB este:",a:["6 cm","12 cm","24 cm","0 cm"],c:1},
-{q:"M este mijlocul segmentului AB, iar AB = 18 cm. Cât este AM?",a:["6 cm","9 cm","18 cm","36 cm"],c:1},
-{q:"M este mijlocul segmentului AB, iar AM = 7 cm. Cât este AB?",a:["7 cm","14 cm","21 cm","3,5 cm"],c:1},
-{q:"A și B sunt simetrice față de O, iar AO = 5 cm. Cât este OB?",a:["5 cm","10 cm","15 cm","2,5 cm"],c:0},
-{q:"A și B sunt simetrice față de O, iar AO = 4 cm. Cât este AB?",a:["4 cm","8 cm","12 cm","16 cm"],c:1},
-{q:"Dacă AB = 20 cm și M este mijlocul segmentului, atunci MB este:",a:["5 cm","10 cm","15 cm","20 cm"],c:1}
+{q:"AB=5 cm, BC=7 cm. AC=?",a:["12","2","35","10"],c:0},
+{q:"Simetricul lui A față de O?",a:["B","C","A","D"],c:0}
 ],
+
+/* TEST CLASA VI */
 [
-{q:"Dacă AB = 9 cm și BC = 4 cm, iar A, B, C sunt coliniare în această ordine, AC este:",a:["5 cm","13 cm","36 cm","9 cm"],c:1},
-{q:"Dacă AC = 22 cm și BC = 10 cm, iar A, B, C sunt coliniare în această ordine, AB este:",a:["12 cm","32 cm","10 cm","22 cm"],c:0},
-{q:"Distanța dintre punctele C și D este 6 cm. Segmentul CD are lungimea:",a:["3 cm","6 cm","12 cm","0 cm"],c:1},
-{q:"Mijlocul segmentului AB împarte segmentul în două părți:",a:["egale","diferite","perpendiculare","paralele"],c:0},
-{q:"Dacă AB = 16 cm și M este mijlocul, AM este:",a:["4 cm","8 cm","12 cm","16 cm"],c:1},
-{q:"Dacă AM = 11 cm și M este mijlocul lui AB, atunci AB este:",a:["11 cm","22 cm","33 cm","5,5 cm"],c:1},
-{q:"A și B sunt simetrice față de O dacă:",a:["O este mijlocul segmentului AB","A este mijlocul lui OB","B este mijlocul lui AO","A, O, B nu sunt coliniare"],c:0},
-{q:"Dacă A și B sunt simetrice față de O și AB = 18 cm, atunci AO este:",a:["6 cm","9 cm","18 cm","36 cm"],c:1}
-],
-[
-{q:"Dacă AB = 14 cm și BC = 7 cm, cu B între A și C, atunci AC este:",a:["7 cm","21 cm","98 cm","14 cm"],c:1},
-{q:"Dacă AC = 30 cm și AB = 12 cm, cu B între A și C, atunci BC este:",a:["18 cm","42 cm","12 cm","30 cm"],c:0},
-{q:"Pe o dreaptă, A(2) și B(9). Distanța AB este:",a:["7","9","11","18"],c:0},
-{q:"Pe o dreaptă, A(5) și B(13). Distanța AB este:",a:["5","8","13","18"],c:1},
-{q:"M este mijlocul lui AB și AB = 24 cm. AM este:",a:["8 cm","12 cm","24 cm","48 cm"],c:1},
-{q:"M este mijlocul lui AB și MB = 6 cm. AB este:",a:["6 cm","12 cm","18 cm","3 cm"],c:1},
-{q:"A și B sunt simetrice față de O, iar OB = 8 cm. AO este:",a:["4 cm","8 cm","16 cm","24 cm"],c:1},
-{q:"A și B sunt simetrice față de O, iar AB = 26 cm. OB este:",a:["13 cm","26 cm","52 cm","6 cm"],c:0}
-],
-[
-{q:"Dacă AB = 3 cm și BC = 11 cm, cu B între A și C, AC este:",a:["8 cm","14 cm","33 cm","11 cm"],c:1},
-{q:"Dacă AC = 19 cm și BC = 8 cm, cu B între A și C, AB este:",a:["11 cm","27 cm","8 cm","19 cm"],c:0},
-{q:"Distanța dintre două puncte este întotdeauna:",a:["un număr negativ","un număr pozitiv sau zero","un unghi","un plan"],c:1},
-{q:"Dacă A și B coincid, distanța AB este:",a:["0","1","2","nu se poate afla"],c:0},
-{q:"M este mijlocul segmentului AB. Dacă AM = 9 cm, atunci MB este:",a:["9 cm","18 cm","4,5 cm","27 cm"],c:0},
-{q:"Dacă AB = 28 cm și M este mijlocul, atunci AM + MB este:",a:["14 cm","28 cm","56 cm","7 cm"],c:1},
-{q:"Simetricul punctului A față de punctul O este punctul B. Atunci:",a:["AO = OB","AO > OB","AO < OB","A = O mereu"],c:0},
-{q:"Dacă AO = 12 cm și B este simetricul lui A față de O, atunci AB este:",a:["12 cm","24 cm","6 cm","36 cm"],c:1}
-],
-[
-{q:"Dacă AB = 10 cm și BC = 15 cm, cu B între A și C, AC este:",a:["5 cm","25 cm","150 cm","15 cm"],c:1},
-{q:"Dacă AC = 40 cm și AB = 17 cm, cu B între A și C, BC este:",a:["23 cm","57 cm","17 cm","40 cm"],c:0},
-{q:"Pe o dreaptă, A(1) și B(10). Distanța AB este:",a:["9","10","11","1"],c:0},
-{q:"Pe o dreaptă, A(12) și B(20). Distanța AB este:",a:["8","12","20","32"],c:0},
-{q:"Dacă AB = 32 cm și M este mijlocul, AM este:",a:["8 cm","16 cm","32 cm","64 cm"],c:1},
-{q:"Dacă M este mijlocul segmentului AB și AM = 13 cm, AB este:",a:["13 cm","26 cm","39 cm","6,5 cm"],c:1},
-{q:"Dacă A și B sunt simetrice față de O, iar AO = 15 cm, OB este:",a:["15 cm","30 cm","45 cm","7,5 cm"],c:0},
-{q:"Dacă A și B sunt simetrice față de O, iar AB = 30 cm, AO este:",a:["10 cm","15 cm","30 cm","60 cm"],c:1}
-],
-[
-{q:"Dacă AB = 6 cm și BC = 16 cm, cu B între A și C, AC este:",a:["10 cm","22 cm","96 cm","16 cm"],c:1},
-{q:"Dacă AC = 27 cm și AB = 9 cm, cu B între A și C, BC este:",a:["18 cm","36 cm","9 cm","27 cm"],c:0},
-{q:"Pe o dreaptă, A(3) și B(15). Distanța AB este:",a:["12","15","18","45"],c:0},
-{q:"Pe o dreaptă, A(7) și B(7). Distanța AB este:",a:["0","7","14","49"],c:0},
-{q:"Dacă AB = 36 cm și M este mijlocul, MB este:",a:["12 cm","18 cm","36 cm","72 cm"],c:1},
-{q:"Dacă M este mijlocul și AM = 20 cm, atunci AB este:",a:["20 cm","40 cm","10 cm","60 cm"],c:1},
-{q:"Dacă B este simetricul lui A față de O, punctele A, O, B sunt:",a:["coliniare","necoliniare","pe cerc","în planuri diferite"],c:0},
-{q:"Dacă AO = 7 cm și B este simetricul lui A față de O, atunci AB este:",a:["7 cm","14 cm","21 cm","3,5 cm"],c:1}
-],
-[
-{q:"Dacă AB = 13 cm și BC = 9 cm, cu B între A și C, AC este:",a:["4 cm","22 cm","117 cm","13 cm"],c:1},
-{q:"Dacă AC = 35 cm și BC = 14 cm, cu B între A și C, AB este:",a:["21 cm","49 cm","14 cm","35 cm"],c:0},
-{q:"Pe o dreaptă, A(0) și B(18). Distanța AB este:",a:["0","9","18","36"],c:2},
-{q:"Pe o dreaptă, A(4) și B(16). Distanța AB este:",a:["10","12","16","20"],c:1},
-{q:"Dacă AB = 44 cm și M este mijlocul, AM este:",a:["11 cm","22 cm","44 cm","88 cm"],c:1},
-{q:"Dacă MB = 17 cm și M este mijlocul lui AB, AB este:",a:["17 cm","34 cm","51 cm","8,5 cm"],c:1},
-{q:"A și B sunt simetrice față de O. Dacă AO = 10 cm, atunci AO + OB este:",a:["10 cm","20 cm","30 cm","5 cm"],c:1},
-{q:"Dacă AB = 42 cm și O este mijlocul lui AB, atunci A și B pot fi:",a:["simetrice față de O","identice","necoliniare cu O","fără distanță"],c:0}
-],
-[
-{q:"Dacă AB = 18 cm și BC = 12 cm, cu B între A și C, AC este:",a:["6 cm","30 cm","216 cm","18 cm"],c:1},
-{q:"Dacă AC = 50 cm și AB = 21 cm, cu B între A și C, BC este:",a:["29 cm","71 cm","21 cm","50 cm"],c:0},
-{q:"Pe o dreaptă, A(8) și B(19). Distanța AB este:",a:["11","19","27","8"],c:0},
-{q:"Distanța dintre P și Q este 25 cm. Atunci QP este:",a:["0 cm","12,5 cm","25 cm","50 cm"],c:2},
-{q:"Dacă AB = 50 cm și M este mijlocul, AM este:",a:["10 cm","25 cm","50 cm","100 cm"],c:1},
-{q:"Mijlocul unui segment de 70 cm îl împarte în două segmente de:",a:["35 cm și 35 cm","30 cm și 40 cm","20 cm și 50 cm","70 cm și 70 cm"],c:0},
-{q:"Dacă A și B sunt simetrice față de O și OB = 19 cm, AO este:",a:["19 cm","38 cm","9,5 cm","57 cm"],c:0},
-{q:"Dacă A și B sunt simetrice față de O și AB = 64 cm, OB este:",a:["16 cm","32 cm","64 cm","128 cm"],c:1}
-],
-[
-{q:"Dacă AB = 25 cm și BC = 5 cm, cu B între A și C, AC este:",a:["20 cm","30 cm","125 cm","25 cm"],c:1},
-{q:"Dacă AC = 60 cm și BC = 22 cm, cu B între A și C, AB este:",a:["38 cm","82 cm","22 cm","60 cm"],c:0},
-{q:"Pe o dreaptă, A(11) și B(14). Distanța AB este:",a:["3","11","14","25"],c:0},
-{q:"Pe o dreaptă, A(6) și B(24). Distanța AB este:",a:["12","18","24","30"],c:1},
-{q:"Dacă AB = 80 cm și M este mijlocul, MB este:",a:["20 cm","40 cm","80 cm","160 cm"],c:1},
-{q:"Dacă M este mijlocul segmentului AB și AM = 25 cm, atunci AB este:",a:["25 cm","50 cm","75 cm","12,5 cm"],c:1},
-{q:"A și B sunt simetrice față de O. Dacă AB = 100 cm, atunci AO este:",a:["25 cm","50 cm","100 cm","200 cm"],c:1},
-{q:"Simetricul punctului A față de O se află:",a:["pe dreapta AO, de cealaltă parte a lui O","oriunde în plan","mereu în A","mereu în O"],c:0}
-],
-[
-{q:"Dacă AB = 4 cm și BC = 19 cm, cu B între A și C, AC este:",a:["15 cm","23 cm","76 cm","19 cm"],c:1},
-{q:"Dacă AC = 45 cm și AB = 28 cm, cu B între A și C, BC este:",a:["17 cm","73 cm","28 cm","45 cm"],c:0},
-{q:"Pe o dreaptă, A(9) și B(30). Distanța AB este:",a:["21","30","39","270"],c:0},
-{q:"Pe o dreaptă, A(2) și B(2). Segmentul AB are lungimea:",a:["0","2","4","nu se poate determina"],c:0},
-{q:"Dacă AB = 90 cm și M este mijlocul, AM este:",a:["30 cm","45 cm","90 cm","180 cm"],c:1},
-{q:"Dacă AM = MB = 16 cm, atunci AB este:",a:["16 cm","32 cm","8 cm","48 cm"],c:1},
-{q:"Dacă A și B sunt simetrice față de O, atunci O este:",a:["mijlocul lui AB","capătul lui AB","un punct exterior dreptei AB","egal cu A mereu"],c:0},
-{q:"Dacă AO = 23 cm și B este simetricul lui A față de O, AB este:",a:["23 cm","46 cm","69 cm","11,5 cm"],c:1}
-],
-[
-{q:"Dacă AB = 31 cm și BC = 9 cm, cu B între A și C, AC este:",a:["22 cm","40 cm","279 cm","31 cm"],c:1},
-{q:"Dacă AC = 72 cm și BC = 18 cm, cu B între A și C, AB este:",a:["54 cm","90 cm","18 cm","72 cm"],c:0},
-{q:"Pe o dreaptă, A(15) și B(40). Distanța AB este:",a:["25","40","55","600"],c:0},
-{q:"Distanța dintre două puncte se măsoară de obicei în:",a:["grade","centimetri sau metri","litri","kilograme"],c:1},
-{q:"Dacă AB = 100 cm și M este mijlocul, AM este:",a:["25 cm","50 cm","100 cm","200 cm"],c:1},
-{q:"Dacă M este mijlocul segmentului AB și MB = 45 cm, AB este:",a:["45 cm","90 cm","135 cm","22,5 cm"],c:1},
-{q:"Dacă A și B sunt simetrice față de O și AB = 12 cm, atunci AO este:",a:["3 cm","6 cm","12 cm","24 cm"],c:1},
-{q:"Dacă AO = OB = 8 cm și A, O, B sunt coliniare, atunci A și B sunt:",a:["simetrice față de O","identice","necoliniare","capete ale unei semidrepte"],c:0}
-],
-[
-{q:"Dacă AB = 2 cm și BC = 23 cm, cu B între A și C, AC este:",a:["21 cm","25 cm","46 cm","23 cm"],c:1},
-{q:"Dacă AC = 55 cm și AB = 30 cm, cu B între A și C, BC este:",a:["25 cm","85 cm","30 cm","55 cm"],c:0},
-{q:"Pe o dreaptă, A(18) și B(26). Distanța AB este:",a:["8","18","26","44"],c:0},
-{q:"Dacă distanța dintre A și B este 0, atunci:",a:["A și B coincid","AB este 1 cm","A și B sunt simetrice","A și B sunt mereu diferite"],c:0},
-{q:"Dacă AB = 120 cm și M este mijlocul, MB este:",a:["30 cm","60 cm","120 cm","240 cm"],c:1},
-{q:"Dacă AM = 37 cm și M este mijlocul segmentului AB, MB este:",a:["37 cm","74 cm","18,5 cm","111 cm"],c:0},
-{q:"A și B sunt simetrice față de O, AO = 31 cm. Atunci AB este:",a:["31 cm","62 cm","93 cm","15,5 cm"],c:1},
-{q:"Dacă AB = 48 cm și O este mijlocul, atunci OB este:",a:["12 cm","24 cm","48 cm","96 cm"],c:1}
-],
-[
-{q:"Dacă AB = 17 cm și BC = 18 cm, cu B între A și C, AC este:",a:["1 cm","35 cm","306 cm","18 cm"],c:1},
-{q:"Dacă AC = 63 cm și BC = 27 cm, cu B între A și C, AB este:",a:["36 cm","90 cm","27 cm","63 cm"],c:0},
-{q:"Pe o dreaptă, A(20) și B(45). Distanța AB este:",a:["20","25","45","65"],c:1},
-{q:"Pe o dreaptă, A(100) și B(115). Distanța AB este:",a:["15","100","115","215"],c:0},
-{q:"Dacă AB = 64 cm și M este mijlocul, AM este:",a:["16 cm","32 cm","64 cm","128 cm"],c:1},
-{q:"Dacă M este mijlocul lui AB, iar AM = 50 cm, atunci AB este:",a:["50 cm","100 cm","150 cm","25 cm"],c:1},
-{q:"Dacă A și B sunt simetrice față de O, iar OB = 41 cm, AB este:",a:["41 cm","82 cm","20,5 cm","123 cm"],c:1},
-{q:"Dacă O este mijlocul lui AB, atunci:",a:["AO = OB","AO > OB","AO < OB","AB = 0 mereu"],c:0}
-],
-[
-{q:"Dacă AB = 12 cm și BC = 21 cm, cu B între A și C, AC este:",a:["9 cm","33 cm","252 cm","21 cm"],c:1},
-{q:"Dacă AC = 88 cm și AB = 51 cm, cu B între A și C, BC este:",a:["37 cm","139 cm","51 cm","88 cm"],c:0},
-{q:"Pe o dreaptă, A(4) și B(29). Distanța AB este:",a:["25","29","33","116"],c:0},
-{q:"Dacă AB = 11 cm, atunci BA este:",a:["11 cm","0 cm","22 cm","nu se poate determina"],c:0},
-{q:"Dacă AB = 72 cm și M este mijlocul, MB este:",a:["18 cm","36 cm","72 cm","144 cm"],c:1},
-{q:"Dacă AM = MB = 29 cm, atunci AB este:",a:["29 cm","58 cm","87 cm","14,5 cm"],c:1},
-{q:"A și B sunt simetrice față de O, iar AB = 70 cm. AO este:",a:["35 cm","70 cm","140 cm","17,5 cm"],c:0},
-{q:"Dacă B este simetricul lui A față de O, atunci O se află:",a:["între A și B","în afara segmentului AB","oriunde","doar în A"],c:0}
-],
-[
-{q:"Dacă AB = 7 cm și BC = 28 cm, cu B între A și C, AC este:",a:["21 cm","35 cm","196 cm","28 cm"],c:1},
-{q:"Dacă AC = 95 cm și BC = 40 cm, cu B între A și C, AB este:",a:["55 cm","135 cm","40 cm","95 cm"],c:0},
-{q:"Pe o dreaptă, A(33) și B(60). Distanța AB este:",a:["27","33","60","93"],c:0},
-{q:"Distanța dintre A și B este egală cu distanța dintre:",a:["B și A","A și A","B și B","oricare două puncte"],c:0},
-{q:"Dacă AB = 84 cm și M este mijlocul, AM este:",a:["21 cm","42 cm","84 cm","168 cm"],c:1},
-{q:"Dacă M este mijlocul și MB = 33 cm, AB este:",a:["33 cm","66 cm","99 cm","16,5 cm"],c:1},
-{q:"Dacă AO = 44 cm și B este simetricul lui A față de O, OB este:",a:["22 cm","44 cm","88 cm","132 cm"],c:1},
-{q:"Dacă A și B sunt simetrice față de O și AB = 90 cm, OB este:",a:["30 cm","45 cm","90 cm","180 cm"],c:1}
-],
-[
-{q:"Dacă AB = 16 cm și BC = 24 cm, cu B între A și C, AC este:",a:["8 cm","40 cm","384 cm","24 cm"],c:1},
-{q:"Dacă AC = 100 cm și AB = 64 cm, cu B între A și C, BC este:",a:["36 cm","164 cm","64 cm","100 cm"],c:0},
-{q:"Pe o dreaptă, A(50) și B(75). Distanța AB este:",a:["25","50","75","125"],c:0},
-{q:"Dacă segmentul MN are lungimea 39 cm, atunci distanța dintre M și N este:",a:["39 cm","78 cm","19,5 cm","0 cm"],c:0},
-{q:"Dacă AB = 66 cm și M este mijlocul, AM este:",a:["22 cm","33 cm","66 cm","132 cm"],c:1},
-{q:"Dacă AM = 42 cm și M este mijlocul lui AB, atunci AB este:",a:["42 cm","84 cm","126 cm","21 cm"],c:1},
-{q:"Dacă A și B sunt simetrice față de O, iar AO = 52 cm, AB este:",a:["52 cm","104 cm","26 cm","156 cm"],c:1},
-{q:"Dacă O este mijlocul lui AB și AO=18 cm, atunci OB este:",a:["9 cm","18 cm","36 cm","54 cm"],c:1}
-],
-[
-{q:"Dacă AB = 27 cm și BC = 13 cm, cu B între A și C, AC este:",a:["14 cm","40 cm","351 cm","27 cm"],c:1},
-{q:"Dacă AC = 110 cm și BC = 47 cm, cu B între A și C, AB este:",a:["63 cm","157 cm","47 cm","110 cm"],c:0},
-{q:"Pe o dreaptă, A(70) și B(90). Distanța AB este:",a:["20","70","90","160"],c:0},
-{q:"Dacă distanța AB este 17 cm, atunci lungimea BA este:",a:["17 cm","34 cm","8,5 cm","0 cm"],c:0},
-{q:"Dacă AB = 46 cm și M este mijlocul, MB este:",a:["23 cm","46 cm","92 cm","11,5 cm"],c:0},
-{q:"Dacă M este mijlocul și AM=60 cm, atunci MB este:",a:["30 cm","60 cm","120 cm","180 cm"],c:1},
-{q:"A și B sunt simetrice față de O, iar AB=34 cm. AO este:",a:["17 cm","34 cm","68 cm","8,5 cm"],c:0},
-{q:"Dacă AO=OB și A, O, B sunt coliniare, cu O între A și B, atunci:",a:["O este mijlocul lui AB","A este mijlocul lui OB","B este mijlocul lui AO","A și B coincid"],c:0}
-],
-[
-{q:"Dacă AB = 39 cm și BC = 11 cm, cu B între A și C, AC este:",a:["28 cm","50 cm","429 cm","39 cm"],c:1},
-{q:"Dacă AC = 120 cm și AB = 75 cm, cu B între A și C, BC este:",a:["45 cm","195 cm","75 cm","120 cm"],c:0},
-{q:"Pe o dreaptă, A(5) și B(55). Distanța AB este:",a:["50","55","60","275"],c:0},
-{q:"Distanța dintre două puncte se notează adesea prin:",a:["lungimea segmentului determinat de ele","aria unui pătrat","măsura unui unghi","volumul unui cub"],c:0},
-{q:"Dacă AB = 98 cm și M este mijlocul, AM este:",a:["49 cm","98 cm","196 cm","24,5 cm"],c:0},
-{q:"Dacă MB = 71 cm și M este mijlocul lui AB, AB este:",a:["71 cm","142 cm","213 cm","35,5 cm"],c:1},
-{q:"Dacă A și B sunt simetrice față de O, iar OB = 55 cm, AO este:",a:["55 cm","110 cm","27,5 cm","165 cm"],c:0},
-{q:"Dacă A și B sunt simetrice față de O și AO=28 cm, AB este:",a:["28 cm","56 cm","84 cm","14 cm"],c:1}
-],
-[
-{q:"Dacă AB = 41 cm și BC = 17 cm, cu B între A și C, AC este:",a:["24 cm","58 cm","697 cm","41 cm"],c:1},
-{q:"Dacă AC = 130 cm și BC = 59 cm, cu B între A și C, AB este:",a:["71 cm","189 cm","59 cm","130 cm"],c:0},
-{q:"Pe o dreaptă, A(80) și B(125). Distanța AB este:",a:["45","80","125","205"],c:0},
-{q:"Dacă segmentul PQ are lungimea 52 cm, distanța dintre P și Q este:",a:["26 cm","52 cm","104 cm","0 cm"],c:1},
-{q:"Dacă AB = 150 cm și M este mijlocul, AM este:",a:["50 cm","75 cm","150 cm","300 cm"],c:1},
-{q:"Dacă AM=MB=36 cm, atunci AB este:",a:["36 cm","72 cm","108 cm","18 cm"],c:1},
-{q:"A și B sunt simetrice față de O, iar AO=63 cm. OB este:",a:["63 cm","126 cm","31,5 cm","189 cm"],c:0},
-{q:"Dacă AB=126 cm și A, B sunt simetrice față de O, atunci AO este:",a:["63 cm","126 cm","252 cm","31,5 cm"],c:0}
-],
-[
-{q:"Dacă AB = 60 cm și BC = 15 cm, cu B între A și C, AC este:",a:["45 cm","75 cm","900 cm","60 cm"],c:1},
-{q:"Dacă AC = 140 cm și AB = 88 cm, cu B între A și C, BC este:",a:["52 cm","228 cm","88 cm","140 cm"],c:0},
-{q:"Pe o dreaptă, A(10) și B(100). Distanța AB este:",a:["90","100","110","1000"],c:0},
-{q:"Dacă AB = 2 × 18 cm, atunci AB este:",a:["18 cm","20 cm","36 cm","40 cm"],c:2},
-{q:"Dacă AB = 200 cm și M este mijlocul, MB este:",a:["50 cm","100 cm","200 cm","400 cm"],c:1},
-{q:"Dacă M este mijlocul și AM = 80 cm, atunci AB este:",a:["80 cm","160 cm","40 cm","240 cm"],c:1},
-{q:"A și B sunt simetrice față de O. Dacă AB = 200 cm, AO este:",a:["50 cm","100 cm","200 cm","400 cm"],c:1},
-{q:"Simetricul punctului A față de punctul O este unic?",a:["Da","Nu","Doar uneori","Nu se poate ști"],c:0}
+{q:"(-7)+(-5)=",a:["-12","12","-2","2"],c:0},
+{q:"|−9|=",a:["-9","9","0","18"],c:1}
 ]
+
 ];
 
-let currentTest=0, i=0, score=0, answered=false;
-const select=document.getElementById("testSelect");
-for(let t=0;t<tests.length;t++){select.innerHTML+=`<option value="${t}">Test ${t+1}</option>`;}
-function selectTest(t){currentTest=parseInt(t);i=0;score=0;load();}
-function load(){answered=false;let questions=tests[currentTest];document.getElementById("number").innerText=`Test ${currentTest+1} - Întrebarea ${i+1} din ${questions.length}`;document.getElementById("q").innerText=questions[i].q;let ans="";questions[i].a.forEach((el,idx)=>{ans+=`<button class="answer" onclick="check(${idx}, this)">${String.fromCharCode(65+idx)}. ${el}</button>`});document.getElementById("answers").innerHTML=ans;document.getElementById("feedback").innerText="";document.querySelector(".next").style.display="none";document.querySelector(".restart").style.display="none";document.getElementById("score").innerText=`Scor: ${score} / ${i}`;}
-function check(sel,btn){if(answered)return;answered=true;let q=tests[currentTest][i];let buttons=document.querySelectorAll(".answer");if(sel===q.c){btn.classList.add("correct");document.getElementById("feedback").innerText="Corect!";score++;}else{btn.classList.add("wrong");buttons[q.c].classList.add("correct");document.getElementById("feedback").innerText="Greșit! Varianta corectă este evidențiată cu verde.";}document.getElementById("score").innerText=`Scor: ${score} / ${i+1}`;if(i<tests[currentTest].length-1){document.querySelector(".next").style.display="block";}else{finish();}}
-function nextQ(){i++;load();}
-function finish(){let total=tests[currentTest].length;let nota=((score/total)*10).toFixed(2);document.getElementById("feedback").innerText += ` Test finalizat! Nota aproximativă: ${nota}.`;document.querySelector(".restart").style.display="block";}
-function restartTest(){i=0;score=0;load();}
+let t=0,i=0;
+
+function startTest(x){
+t=x;
+i=0;
+document.getElementById("game").style.display="block";
 load();
+}
+
+function load(){
+let q=tests[t][i];
+document.getElementById("q").innerText=q.q;
+let html="";
+q.a.forEach((a,idx)=>{
+html+=`<button class='answer' onclick='check(${idx})'>${a}</button>`;
+});
+document.getElementById("answers").innerHTML=html;
+document.getElementById("feedback").innerText="";
+}
+
+function check(x){
+let q=tests[t][i];
+if(x===q.c){
+document.getElementById("feedback").innerText="Corect";
+}else{
+document.getElementById("feedback").innerText="Greșit";
+}
+}
+
+function nextQ(){
+i++;
+if(i<tests[t].length){
+load();
+}else{
+alert("Test finalizat!");
+}
+}
+
 </script>
+
 </body>
 </html>
