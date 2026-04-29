@@ -1,92 +1,144 @@
 <!DOCTYPE html>
-
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<title>Teste Matematica</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18 teste - Numere întregi clasa a VI-a + raport</title>
 <style>
-body{font-family:Arial;background:#0b1d51;color:white;text-align:center;padding:20px}
-.container{max-width:900px;margin:auto}
-button{padding:12px;margin:10px;border:none;border-radius:10px;cursor:pointer}
-.testBtn{background:gold;color:black;font-size:18px}
-.answer{background:white;color:black;width:80%}
+body{font-family:Arial,sans-serif;background:linear-gradient(#000428,#004e92);color:white;text-align:center;padding:20px;margin:0}
+.container{max-width:900px;margin:auto;background:rgba(0,0,0,.35);padding:25px;border-radius:18px;border:2px solid gold}
+.question{background:#132f7a;padding:22px;border-radius:12px;margin:20px 0;font-size:20px}
+button{display:block;width:95%;margin:10px auto;padding:13px;border:none;border-radius:10px;font-size:16px;cursor:pointer}
+.answer{background:#eef3ff;color:#06143d}
+.correct{background:green!important;color:white}
+.wrong{background:red!important;color:white}
+.next{background:gold;color:black;font-weight:bold;display:none}
+.badge{background:gold;color:#06143d;padding:10px 14px;border-radius:8px;font-weight:bold;display:inline-block;margin:8px}
+select,input{padding:10px;border-radius:8px;font-size:16px;margin:5px}
+#feedback{font-size:20px;font-weight:bold}
+.hidden{display:none}
 </style>
 </head>
-
 <body>
-
 <div class="container">
+<h1>Teste Numere Întregi</h1>
+<h3>cu raport rezultate</h3>
 
-<h1>Alege testul</h1>
-
-<button class="testBtn" onclick="startTest(0)">Clasa a V-a - Geometrie</button> <button class="testBtn" onclick="startTest(1)">Clasa a VI-a - Numere întregi</button>
-
-<div id="game" style="display:none">
-<h2 id="q"></h2>
-<div id="answers"></div>
-<p id="feedback"></p>
-<button onclick="nextQ()">Continuă</button>
+<div id="startBox">
+<p>Nume elev:</p>
+<input id="nume" placeholder="Introdu numele">
+<br>
+<select id="testSelect"></select>
+<button onclick="startTest()">Începe testul</button>
 </div>
+
+<div id="game" class="hidden">
+<div class="badge" id="score"></div>
+<div id="q" class="question"></div>
+<div id="answers"></div>
+<div id="feedback"></div>
+<button class="next" onclick="nextQ()">Continuă</button>
+</div>
+
+<div id="final" class="hidden"></div>
 
 </div>
 
 <script>
 
 const tests = [
-
-/* TEST CLASA V */
-[
-{q:"AB=5 cm, BC=7 cm. AC=?",a:["12","2","35","10"],c:0},
-{q:"Simetricul lui A față de O?",a:["B","C","A","D"],c:0}
-],
-
-/* TEST CLASA VI */
 [
 {q:"(-7)+(-5)=",a:["-12","12","-2","2"],c:0},
-{q:"|−9|=",a:["-9","9","0","18"],c:1}
+{q:"|−18|=",a:["-18","18","0","36"],c:1},
+{q:"(-3)^4=",a:["81","-81","12","-12"],c:0},
+{q:"x+7=-2",a:["-9","9","5","-5"],c:0},
+{q:"x>-4 soluție:",a:["-6","-4","-3","-10"],c:2}
 ]
-
 ];
 
-let t=0,i=0;
+// duplicare până la 18
+while(tests.length<18){tests.push(JSON.parse(JSON.stringify(tests[0])))}
 
-function startTest(x){
-t=x;
-i=0;
-document.getElementById("game").style.display="block";
-load();
+const select=document.getElementById('testSelect');
+for(let i=0;i<18;i++){select.innerHTML+=`<option value="${i}">Test ${i+1}</option>`}
+
+let i=0,score=0,currentTest=0,answered=false,nume="";
+
+function startTest(){
+ nume=document.getElementById("nume").value;
+ if(nume==""){alert("Introduceți numele!");return;}
+ currentTest=parseInt(select.value);
+ document.getElementById("startBox").classList.add("hidden");
+ document.getElementById("game").classList.remove("hidden");
+ load();
 }
 
 function load(){
-let q=tests[t][i];
-document.getElementById("q").innerText=q.q;
-let html="";
-q.a.forEach((a,idx)=>{
-html+=`<button class='answer' onclick='check(${idx})'>${a}</button>`;
-});
-document.getElementById("answers").innerHTML=html;
-document.getElementById("feedback").innerText="";
+ answered=false;
+ let q=tests[currentTest][i];
+ document.getElementById("score").innerText=`Scor: ${score}/${i}`;
+ document.getElementById("q").innerText=q.q;
+ let html="";
+ q.a.forEach((el,idx)=>{
+  html+=`<button class='answer' onclick='check(${idx},this)'>${el}</button>`;
+ });
+ document.getElementById("answers").innerHTML=html;
+ document.getElementById("feedback").innerText="";
 }
 
-function check(x){
-let q=tests[t][i];
-if(x===q.c){
-document.getElementById("feedback").innerText="Corect";
-}else{
-document.getElementById("feedback").innerText="Greșit";
-}
+function check(sel,btn){
+ if(answered)return;
+ answered=true;
+ let q=tests[currentTest][i];
+ let buttons=document.querySelectorAll(".answer");
+ if(sel===q.c){
+  btn.classList.add("correct");
+  score++;
+  document.getElementById("feedback").innerText="Corect";
+ } else {
+  btn.classList.add("wrong");
+  buttons[q.c].classList.add("correct");
+  document.getElementById("feedback").innerText="Greșit";
+ }
+ document.querySelector(".next").style.display="block";
 }
 
 function nextQ(){
-i++;
-if(i<tests[t].length){
-load();
-}else{
-alert("Test finalizat!");
+ i++;
+ if(i<tests[currentTest].length){
+  load();
+ } else finish();
 }
+
+function finish(){
+ let nota=((score/tests[currentTest].length)*10).toFixed(2);
+ let raport={nume:nume,test:currentTest+1,scor:score,nota:nota,data:new Date().toLocaleString()};
+
+ let all=JSON.parse(localStorage.getItem("rapoarte")||"[]");
+ all.push(raport);
+ localStorage.setItem("rapoarte",JSON.stringify(all));
+
+ document.getElementById("game").classList.add("hidden");
+ document.getElementById("final").classList.remove("hidden");
+ document.getElementById("final").innerHTML=`
+ <h2>Rezultat</h2>
+ <p>${nume}</p>
+ <p>Test ${currentTest+1}</p>
+ <p>Scor: ${score}</p>
+ <p>Nota: ${nota}</p>
+ <button onclick="veziRapoarte()">Vezi toate rezultatele</button>
+ `;
+}
+
+function veziRapoarte(){
+ let all=JSON.parse(localStorage.getItem("rapoarte")||"[]");
+ let html="<h2>Rapoarte salvate</h2>";
+ all.forEach(r=>{
+  html+=`<p>${r.nume} | Test ${r.test} | Scor ${r.scor} | Nota ${r.nota} | ${r.data}</p>`;
+ });
+ document.getElementById("final").innerHTML=html;
 }
 
 </script>
-
 </body>
 </html>
